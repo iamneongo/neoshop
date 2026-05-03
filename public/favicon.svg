@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+    <defs>
+      <filter id="softShadow" x="-60%" y="-60%" width="220%" height="220%">
+        <feDropShadow dx="0" dy="18" stdDeviation="14" flood-color="#0f4fb8" flood-opacity=".18"/>
+      </filter>
+      <filter id="tileShadow" x="-40%" y="-40%" width="180%" height="180%">
+        <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#24416f" flood-opacity=".16"/>
+      </filter>
+      <linearGradient id="bagGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop stop-color="#42a5ff"/>
+        <stop offset=".58" stop-color="#126cff"/>
+        <stop offset="1" stop-color="#2545d8"/>
+      </linearGradient>
+      <linearGradient id="geminiGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop stop-color="#7dc8ff"/>
+        <stop offset=".5" stop-color="#326dff"/>
+        <stop offset="1" stop-color="#8d4cff"/>
+      </linearGradient>
+    </defs><rect x="11.008" y="15.488" width="41.984" height="38.528" rx="8.512" fill="url(#bagGrad)" filter="url(#softShadow)"/>
+    <path d="M19.776 20.48c0-8 4.992-13.504 12.224-13.504s12.224 5.504 12.224 13.504" fill="none" stroke="#7ec2ff" stroke-width="3.776" stroke-linecap="round"/>
+    <text x="32" y="42.24" text-anchor="middle" font-family="Arial, sans-serif" font-size="26.24" font-weight="900" font-style="italic" fill="#fff">N</text></svg>

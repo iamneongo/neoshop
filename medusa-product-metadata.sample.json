@@ -1,0 +1,47 @@
+[
+  {
+    "title": "ChatGPT Plus",
+    "handle": "chatgpt-plus",
+    "metadata": {
+      "short_description": "Tài khoản chính chủ",
+      "icon": "/assets/icon-chatgpt.png",
+      "badge": "Bán chạy",
+      "badge_color": "green",
+      "href": "/san-pham/chatgpt-plus"
+    },
+    "variants": [
+      { "title": "1 Tháng", "price_vnd": 149000 },
+      { "title": "3 Tháng", "price_vnd": 399000 },
+      { "title": "6 Tháng", "price_vnd": 799000 },
+      { "title": "12 Tháng", "price_vnd": 1399000 }
+    ]
+  },
+  {
+    "title": "Gemini Advanced",
+    "handle": "gemini-advanced",
+    "metadata": {
+      "short_description": "Google One AI Premium",
+      "icon": "/assets/icon-gemini.png",
+      "badge": "Hot",
+      "badge_color": "orange",
+      "href": "/san-pham/chatgpt-plus"
+    },
+    "variants": [
+      { "title": "1 Tháng", "price_vnd": 149000 }
+    ]
+  },
+  {
+    "title": "Claude Pro",
+    "handle": "claude-pro",
+    "metadata": {
+      "short_description": "Anthropic Claude AI",
+      "icon": "/assets/icon-claude.png",
+      "badge": "Mới",
+      "badge_color": "purple",
+      "href": "/san-pham/chatgpt-plus"
+    },
+    "variants": [
+      { "title": "1 Tháng", "price_vnd": 149000 }
+    ]
+  }
+]
