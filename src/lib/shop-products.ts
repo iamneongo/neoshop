@@ -37,6 +37,8 @@ export const fallbackProducts: ShopProduct[] = [
   { title: "ChatGPT Plus", desc: "Tài khoản ChatGPT Plus 1 tháng", icon: "/assets/icon-chatgpt.png", price: "120.000đ", badge: "Bán chạy", color: "green", href: "/san-pham/chatgpt-plus" }
 ];
 
+const MEDUSA_PRODUCTS_TIMEOUT_MS = 5000;
+
 function formatVnd(amount?: number | null) {
   if (!amount || amount <= 0) return "Liên hệ";
   return `${new Intl.NumberFormat("vi-VN").format(amount)}đ`;
@@ -80,6 +82,8 @@ export async function getShopProducts(): Promise<ShopProduct[]> {
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), MEDUSA_PRODUCTS_TIMEOUT_MS);
     const fields = [
       "id",
       "title",
@@ -97,8 +101,9 @@ export async function getShopProducts(): Promise<ShopProduct[]> {
       headers: {
         "x-publishable-api-key": publishableKey
       },
-      next: { revalidate: 60 }
-    });
+      next: { revalidate: 60 },
+      signal: controller.signal
+    }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) return fallbackProducts;
 

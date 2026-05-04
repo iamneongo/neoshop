@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: neoshop-medusa
+    runtime: node
+    repo: https://github.com/iamneongo/neoshop.git
+    rootDir: medusa/apps/backend
+    region: singapore
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install --legacy-peer-deps && npm run build:prod
+    startCommand: npm run start:prod -- --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: MEDUSA_WORKER_MODE
+        value: shared
+      - key: DISABLE_MEDUSA_ADMIN
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: STORE_CORS
+        sync: false
+      - key: ADMIN_CORS
+        sync: false
+      - key: AUTH_CORS
+        sync: false
+      - key: MEDUSA_BACKEND_URL
+        sync: false
+      - key: CLERK_SYNC_SECRET
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true

@@ -1,6 +1,6 @@
 import { createCustomersWorkflow, updateCustomersWorkflow } from "@medusajs/core-flows";
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http";
-import { ContainerRegistrationKeys, remoteQueryObjectFromString } from "@medusajs/framework/utils";
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 
 type ClerkCustomerBody = {
   clerk_user_id?: string;
@@ -27,31 +27,23 @@ function clean(value?: string | null) {
 }
 
 async function findCustomerByEmail(req: MedusaRequest, email: string) {
-  const remoteQuery = req.scope.resolve(ContainerRegistrationKeys.REMOTE_QUERY);
-  const query = remoteQueryObjectFromString({
-    entryPoint: "customers",
-    variables: {
-      filters: { email },
-      skip: 0,
-      take: 1,
-    },
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const { data } = await query.graph({
+    entity: "customer",
     fields: customerFields,
+    filters: { email },
   });
-  const { rows } = await remoteQuery(query);
-  return rows?.[0] as MedusaCustomer | undefined;
+  return data?.[0] as MedusaCustomer | undefined;
 }
 
 async function refetchCustomer(req: MedusaRequest, id: string) {
-  const remoteQuery = req.scope.resolve(ContainerRegistrationKeys.REMOTE_QUERY);
-  const query = remoteQueryObjectFromString({
-    entryPoint: "customer",
-    variables: {
-      filters: { id },
-    },
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
+  const { data } = await query.graph({
+    entity: "customer",
     fields: customerFields,
+    filters: { id },
   });
-  const customers = await remoteQuery(query);
-  return customers?.[0] as MedusaCustomer | undefined;
+  return data?.[0] as MedusaCustomer | undefined;
 }
 
 export async function POST(req: MedusaRequest<ClerkCustomerBody>, res: MedusaResponse) {

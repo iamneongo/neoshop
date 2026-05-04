@@ -12,3 +12,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 data/access-entitlements.json
+.vercel
+.tools
+tsconfig.tsbuildinfo

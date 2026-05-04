@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AccountClient } from "../_components/auth-client";
-import { Breadcrumb, Footer, SiteHeader } from "../_components/shared";
+import { Footer, SiteHeader } from "../_components/shared";
 
 export const metadata: Metadata = {
   title: "Tài khoản khách hàng",
@@ -12,7 +12,6 @@ export default function AccountPage() {
     <main>
       <SiteHeader />
       <div className="container">
-        <Breadcrumb current="Tài khoản" />
         <AccountClient />
       </div>
       <Footer />

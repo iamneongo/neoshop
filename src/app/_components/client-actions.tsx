@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -10,7 +10,6 @@ import {
   ChevronDown,
   Copy,
   CreditCard,
-  Search,
   ShieldCheck,
   ShoppingCart,
   Wallet,
@@ -116,62 +115,39 @@ function ClientPaymentMethods({ compact = false }: { compact?: boolean }) {
 export function HeaderActions() {
   const router = useRouter();
   const { isLoaded, isSignedIn, user } = useUser();
-  const [query, setQuery] = useState("");
-  const [count, setCount] = useState(cartCount);
-  const { message, showToast } = useToast();
-  const accountLabel = isLoaded && isSignedIn ? "Tài khoản" : "Đăng nhập";
-  const accountTitle = isSignedIn ? user?.fullName || user?.primaryEmailAddress?.emailAddress || accountLabel : undefined;
-
-  useEffect(() => {
-    const sync = () => setCount(cartCount());
-    window.addEventListener("storage", sync);
-    window.addEventListener("neoshop-cart-updated", sync);
-    sync();
-    return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("neoshop-cart-updated", sync);
-    };
-  }, []);
-
-  function submitSearch(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = query.trim();
-    if (!value) {
-      showToast("Nhập từ khóa sản phẩm cần tìm");
-      return;
-    }
-    router.push(`/san-pham?q=${encodeURIComponent(value)}`);
-  }
-
-  function openCart() {
-    if (count === 0) {
-      showToast("Giỏ hàng đang trống");
-      return;
-    }
-    router.push("/thanh-toan");
-  }
+  const accountTitle = user?.fullName || user?.primaryEmailAddress?.emailAddress || "Tài khoản";
 
   function openAccount() {
-    router.push(isSignedIn ? "/tai-khoan" : "/dang-nhap");
+    router.push("/dang-nhap");
   }
 
   return (
-    <>
-      <form className="navActions" action="/san-pham" method="get" data-action-form="search" onSubmit={submitSearch}>
-        <label className="search">
-          <input name="q" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm kiếm sản phẩm..." />
-          <Search size={17} />
-        </label>
-        <button className="cartBtn" type="button" aria-label="Giỏ hàng" data-action="open-cart" onClick={openCart}>
-          <ShoppingCart size={19} />
-          <span>{count}</span>
+    <div className="navActions">
+      {(!isLoaded || !isSignedIn) ? (
+        <button className="loginBtn" type="button" onClick={openAccount}>
+          Đăng nhập
         </button>
-        <button className="loginBtn" type="button" onClick={openAccount} title={accountTitle}>
-          {accountLabel}
-        </button>
-      </form>
-      <Toast message={message} />
-    </>
+      ) : null}
+
+      {isLoaded && isSignedIn ? (
+        <div className="clerkHeaderAccount">
+          <Link className="clerkHeaderMeta" href="/tai-khoan" title={accountTitle}>
+            <small>Tài khoản</small>
+            <strong>{accountTitle}</strong>
+          </Link>
+          <div className="clerkHeaderButton">
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "clerkHeaderAvatar",
+                  userButtonTrigger: "clerkHeaderTrigger",
+                },
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
 

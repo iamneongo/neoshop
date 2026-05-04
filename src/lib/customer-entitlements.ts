@@ -16,16 +16,22 @@ export type AccessEntitlement = {
   displayType?: "email" | "license_code";
   displayValue?: string;
   accessEmail?: string;
+  accessPassword?: string;
   otpEmail?: string;
+  refreshToken?: string;
+  clientId?: string;
+  totpSecret?: string;
   authType?: "none" | "email_otp" | "totp_2fa";
   maskedIdentifier?: string;
   instructions: string[];
   supportNote?: string;
 };
 
-export type PublicAccessEntitlement = Omit<AccessEntitlement, "customerEmail" | "accessEmail"> & {
+export type PublicAccessEntitlement = Omit<AccessEntitlement, "customerEmail" | "accessEmail" | "refreshToken" | "clientId" | "totpSecret"> & {
   accessLabel: string;
   accessValue?: string;
+  canReadMailbox: boolean;
+  canViewTotp: boolean;
 };
 
 const fallbackEntitlements: AccessEntitlement[] = [
@@ -61,17 +67,26 @@ function maskEmail(email?: string) {
 }
 
 function toPublicEntitlement(item: AccessEntitlement): PublicAccessEntitlement {
-  const { customerEmail: _customerEmail, accessEmail, ...safeItem } = item;
+  const {
+    customerEmail: _customerEmail,
+    accessEmail,
+    refreshToken: _refreshToken,
+    clientId: _clientId,
+    totpSecret: _totpSecret,
+    ...safeItem
+  } = item;
   const accessValue = item.displayValue || accessEmail;
 
   return {
     ...safeItem,
     accessValue,
     accessLabel: accessValue || item.maskedIdentifier || maskEmail(accessEmail) || "Đang chờ cấp quyền truy cập",
+    canReadMailbox: Boolean(item.refreshToken && item.clientId && accessEmail),
+    canViewTotp: item.authType === "totp_2fa" && Boolean(item.totpSecret),
   };
 }
 
-async function readEntitlementFile() {
+export async function readEntitlementFile() {
   const filePath = path.join(process.cwd(), "data", "access-entitlements.json");
 
   try {
@@ -90,4 +105,14 @@ export async function getPublicEntitlementsForEmail(email: string) {
   return entitlements
     .filter((item) => normalizeEmail(item.customerEmail) === normalized)
     .map(toPublicEntitlement);
+}
+
+export async function getEntitlementForEmailById(email: string, entitlementId: string) {
+  const entitlements = await readEntitlementFile();
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedId = entitlementId.trim();
+
+  return entitlements.find(
+    (item) => normalizeEmail(item.customerEmail) === normalizedEmail && item.id === normalizedId
+  ) || null;
 }

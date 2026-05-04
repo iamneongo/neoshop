@@ -14,7 +14,9 @@
   ],
   "scripts": {
     "build": "medusa build",
+    "build:prod": "medusa build && cd .medusa/server && npm install --legacy-peer-deps",
     "start": "medusa start",
+    "start:prod": "cd .medusa/server && npm run start --",
     "dev": "medusa develop",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
     "test:integration:modules": "TEST_TYPE=integration:modules NODE_OPTIONS=--experimental-vm-modules jest --silent=false --runInBand --forceExit",
