@@ -1,10 +1,8 @@
-import { promises as fs } from "fs";
-import path from "path";
-
 export type AccessStatus = "pending" | "active" | "support" | "expired";
 
 export type AccessEntitlement = {
   id: string;
+  accountId?: string;
   customerEmail: string;
   orderId: string;
   productName: string;
@@ -27,7 +25,10 @@ export type AccessEntitlement = {
   supportNote?: string;
 };
 
-export type PublicAccessEntitlement = Omit<AccessEntitlement, "customerEmail" | "accessEmail" | "refreshToken" | "clientId" | "totpSecret"> & {
+export type PublicAccessEntitlement = Omit<
+  AccessEntitlement,
+  "customerEmail" | "accessEmail" | "refreshToken" | "clientId" | "totpSecret"
+> & {
   accessLabel: string;
   accessValue?: string;
   canReadMailbox: boolean;
@@ -86,20 +87,47 @@ function toPublicEntitlement(item: AccessEntitlement): PublicAccessEntitlement {
   };
 }
 
-export async function readEntitlementFile() {
-  const filePath = path.join(process.cwd(), "data", "access-entitlements.json");
+function medusaBaseUrl() {
+  return (
+    process.env.MEDUSA_BACKEND_URL?.trim() ||
+    process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.trim() ||
+    ""
+  ).replace(/\/$/, "");
+}
 
-  try {
-    const content = await fs.readFile(filePath, "utf8");
-    const parsed = JSON.parse(content) as AccessEntitlement[];
-    return Array.isArray(parsed) ? parsed : fallbackEntitlements;
-  } catch {
-    return fallbackEntitlements;
+function internalSecret() {
+  return process.env.MEDUSA_INTERNAL_SECRET?.trim() || process.env.CLERK_SYNC_SECRET?.trim() || "";
+}
+
+async function fetchCustomerEntitlements(email: string) {
+  const baseUrl = medusaBaseUrl();
+  const secret = internalSecret();
+
+  if (!baseUrl || !secret) {
+    return fallbackEntitlements.filter((item) => normalizeEmail(item.customerEmail) === normalizeEmail(email));
   }
+
+  const response = await fetch(`${baseUrl}/store/customer-access?email=${encodeURIComponent(email)}`, {
+    headers: {
+      "x-medusa-internal-secret": secret,
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    if (normalizeEmail(email) === "demo@neoshop.vn") {
+      return fallbackEntitlements;
+    }
+
+    throw new Error(`Không thể tải entitlement từ Medusa (${response.status}).`);
+  }
+
+  const payload = (await response.json()) as { entitlements?: AccessEntitlement[] };
+  return Array.isArray(payload.entitlements) ? payload.entitlements : [];
 }
 
 export async function getPublicEntitlementsForEmail(email: string) {
-  const entitlements = await readEntitlementFile();
+  const entitlements = await fetchCustomerEntitlements(email);
   const normalized = normalizeEmail(email);
 
   return entitlements
@@ -108,11 +136,13 @@ export async function getPublicEntitlementsForEmail(email: string) {
 }
 
 export async function getEntitlementForEmailById(email: string, entitlementId: string) {
-  const entitlements = await readEntitlementFile();
+  const entitlements = await fetchCustomerEntitlements(email);
   const normalizedEmail = normalizeEmail(email);
   const normalizedId = entitlementId.trim();
 
-  return entitlements.find(
-    (item) => normalizeEmail(item.customerEmail) === normalizedEmail && item.id === normalizedId
-  ) || null;
+  return (
+    entitlements.find(
+      (item) => normalizeEmail(item.customerEmail) === normalizedEmail && item.id === normalizedId
+    ) || null
+  );
 }

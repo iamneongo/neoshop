@@ -1,37 +1,93 @@
-# Quản lý quyền truy cập đã cấp
+# Quản lý account đã cấp bằng Medusa
 
-NeoShop đọc quyền truy cập của khách từ file `data/access-entitlements.json`.
-File này bị ignore bởi Git để tránh đưa dữ liệu vận hành lên source.
+NeoShop không còn đọc entitlement từ `data/access-entitlements.json`.
+Từ giờ, inventory account và assignment theo email khách hàng được lưu trong database của Medusa.
 
-Tạo file từ mẫu:
+## Luồng dữ liệu
 
-```powershell
-Copy-Item data\access-entitlements.sample.json data\access-entitlements.json
-```
+1. Import account inventory vào Medusa.
+2. Gán từng account cho `customer_email`.
+3. Storefront gọi `GET /store/customer-access?email=...` bằng secret nội bộ.
+4. Trang `/tai-khoan` chỉ hiển thị account đã được gán đúng cho email đang đăng nhập.
 
-Mỗi record đại diện cho một quyền truy cập đã cấp:
+## Admin API
+
+Các route này chạy trong Medusa backend và yêu cầu quyền admin:
+
+- `GET /admin/access/accounts`
+- `POST /admin/access/accounts`
+- `POST /admin/access/accounts/bulk`
+- `GET /admin/access/assignments`
+- `POST /admin/access/assignments`
+- `DELETE /admin/access/assignments?account_id=<id>`
+
+### Import hàng loạt account
+
+Body mẫu cho `POST /admin/access/accounts/bulk`:
 
 ```json
 {
-  "id": "ent_order_10024",
-  "customerEmail": "khach@example.com",
-  "orderId": "NS10024",
-  "productName": "ChatGPT Plus",
+  "product_name": "ChatGPT Plus",
   "plan": "1 tháng",
-  "status": "active",
-  "startsAt": "2026-05-03",
-  "expiresAt": "2026-06-03",
-  "deliveryType": "seat_invite",
-  "maskedIdentifier": "kh***@example.com",
-  "instructions": [
-    "Mở email nhận lời mời và bấm chấp nhận quyền truy cập.",
-    "Không chia sẻ mã xác minh, OTP hoặc mã 2FA cho bất kỳ ai.",
-    "Liên hệ NeoShop nếu cần đổi email nhận quyền truy cập."
-  ],
-  "supportNote": "Quyền truy cập được bảo hành trong thời hạn gói."
+  "lines": [
+    "email1@example.com|password1|refresh_token_1|client_id_1",
+    "email2@example.com|password2|refresh_token_2|client_id_2"
+  ]
 }
 ```
 
-Không lưu mật khẩu, token phiên đăng nhập, OTP hoặc secret 2FA trong file này.
-Nếu cần lưu dữ liệu nội bộ nhạy cảm cho vận hành, hãy dùng vault riêng có mã hóa,
-phân quyền admin, audit log và quy trình rotate.
+### Gán account cho khách hàng
+
+Body mẫu cho `POST /admin/access/assignments`:
+
+```json
+{
+  "account_id": "acc_xxx",
+  "customer_email": "khach@example.com",
+  "order_id": "NS10024",
+  "status": "active",
+  "starts_at": "2026-05-04T00:00:00.000Z",
+  "expires_at": "2026-06-04T00:00:00.000Z"
+}
+```
+
+## Script import nhanh
+
+Có thể import hàng loạt account bằng script Medusa:
+
+```powershell
+$env:ACCESS_PRODUCT_NAME="ChatGPT Plus"
+$env:ACCESS_PLAN="1 tháng"
+$env:ACCESS_ACCOUNT_LINES=@"
+email1@example.com|password1|refresh_token_1|client_id_1
+email2@example.com|password2|refresh_token_2|client_id_2
+"@
+
+npx medusa exec ./src/scripts/import-managed-access-accounts.ts
+
+### Gán nhanh cho một email khách hàng
+
+```powershell
+$env:CUSTOMER_EMAIL="khach@example.com"
+$env:ACCESS_ACCOUNT_EMAIL="MaldomadoMasterman9189@hotmail.com"
+$env:ORDER_ID="NS10024"
+$env:STARTS_AT="2026-05-04T00:00:00.000Z"
+$env:EXPIRES_AT="2026-06-04T00:00:00.000Z"
+
+npx medusa exec ./src/scripts/assign-managed-access-account.ts
+```
+
+Có thể dùng `ACCESS_ACCOUNT_ID` thay cho `ACCESS_ACCOUNT_EMAIL` nếu muốn chỉ định chính xác record inventory.
+```
+
+## Secret nội bộ
+
+Storefront gọi Medusa bằng:
+
+- `MEDUSA_INTERNAL_SECRET`, hoặc
+- fallback sang `CLERK_SYNC_SECRET` nếu chưa cấu hình secret riêng.
+
+Nếu muốn tách bạch rõ hơn, hãy set thêm `MEDUSA_INTERNAL_SECRET` giống nhau ở:
+
+- frontend Next.js
+- backend Medusa
