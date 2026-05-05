@@ -1,9 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import ChatBubbleLeftRightIcon from "@heroicons/react/24/outline/ChatBubbleLeftRightIcon";
+import MusicalNoteIcon from "@heroicons/react/24/outline/MusicalNoteIcon";
+import PhotoIcon from "@heroicons/react/24/outline/PhotoIcon";
+import PlayCircleIcon from "@heroicons/react/24/outline/PlayCircleIcon";
 import {
   BadgeCheck,
   ChevronDown,
-  Facebook,
   Headphones,
   Home,
   LockKeyhole,
@@ -30,6 +33,13 @@ const paymentLogos = [
   { src: "/assets/payment-vnpay.png", alt: "VNPAY", width: 250, height: 84 },
   { src: "/assets/payment-visa.png", alt: "Visa", width: 138, height: 84 },
   { src: "/assets/payment-mastercard.png", alt: "Mastercard", width: 120, height: 84 }
+];
+
+const socialIcons = [
+  { label: "Facebook", Icon: ChatBubbleLeftRightIcon },
+  { label: "Instagram", Icon: PhotoIcon },
+  { label: "YouTube", Icon: PlayCircleIcon },
+  { label: "TikTok", Icon: MusicalNoteIcon }
 ];
 
 export function Logo() {
@@ -122,10 +132,11 @@ export function Footer() {
           <Logo />
           <p>Cung cấp tài khoản ChatGPT Plus 1 tháng chính hãng giá 120.000đ. Cam kết chất lượng - Bảo hành - Hỗ trợ tận tâm.</p>
           <div className="socials">
-            <span><Facebook size={16} /></span>
-            <span>↗</span>
-            <span>♟</span>
-            <span>♪</span>
+            {socialIcons.map(({ label, Icon }) => (
+              <span key={label} title={label} aria-hidden="true">
+                <Icon />
+              </span>
+            ))}
           </div>
         </div>
         <div>
