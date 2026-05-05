@@ -1324,18 +1324,32 @@ button {
   text-align: center;
 }
 
-.stepsLine::before {
+.step {
+  position: relative;
+  isolation: isolate;
+}
+
+.step::before,
+.step::after {
   position: absolute;
-  top: 41px;
-  left: 18%;
-  right: 18%;
+  top: 37px;
+  width: calc(50% - 54px);
   height: 2px;
-  background: linear-gradient(90deg, #dbe8fb, #0f6fff, #dbe8fb);
+  background: #b7d0ff;
   content: "";
 }
 
-.step {
-  position: relative;
+.step::before {
+  left: 0;
+}
+
+.step::after {
+  right: 0;
+}
+
+.step:first-child::before,
+.step:last-child::after {
+  display: none;
 }
 
 .step i {
@@ -2002,11 +2016,6 @@ button {
     gap: 8px;
   }
 
-  .stepsLine::before {
-    left: 15%;
-    right: 15%;
-  }
-
   .paymentsPanel img {
     width: 100%;
   }
@@ -2538,7 +2547,8 @@ button {
     display: grid;
   }
 
-  .stepsLine::before {
+  .step::before,
+  .step::after {
     display: none;
   }
 
