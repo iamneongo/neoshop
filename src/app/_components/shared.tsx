@@ -1,9 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import ChatBubbleLeftRightIcon from "@heroicons/react/24/outline/ChatBubbleLeftRightIcon";
-import MusicalNoteIcon from "@heroicons/react/24/outline/MusicalNoteIcon";
-import PhotoIcon from "@heroicons/react/24/outline/PhotoIcon";
-import PlayCircleIcon from "@heroicons/react/24/outline/PlayCircleIcon";
 import {
   BadgeCheck,
   ChevronDown,
@@ -21,6 +17,7 @@ import {
   Truck,
   Zap
 } from "lucide-react";
+import { siFacebook, siInstagram, siTiktok, siYoutube, type SimpleIcon } from "simple-icons";
 import { AddToCartButton, HeaderActions } from "./client-actions";
 
 export const products = [
@@ -36,11 +33,19 @@ const paymentLogos = [
 ];
 
 const socialIcons = [
-  { label: "Facebook", Icon: ChatBubbleLeftRightIcon },
-  { label: "Instagram", Icon: PhotoIcon },
-  { label: "YouTube", Icon: PlayCircleIcon },
-  { label: "TikTok", Icon: MusicalNoteIcon }
+  siFacebook,
+  siInstagram,
+  siYoutube,
+  siTiktok
 ];
+
+function BrandSocialIcon({ icon }: { icon: SimpleIcon }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d={icon.path} fill="currentColor" />
+    </svg>
+  );
+}
 
 export function Logo() {
   return (
@@ -132,9 +137,9 @@ export function Footer() {
           <Logo />
           <p>Cung cấp tài khoản ChatGPT Plus 1 tháng chính hãng giá 120.000đ. Cam kết chất lượng - Bảo hành - Hỗ trợ tận tâm.</p>
           <div className="socials">
-            {socialIcons.map(({ label, Icon }) => (
-              <span key={label} title={label} aria-hidden="true">
-                <Icon />
+            {socialIcons.map((icon) => (
+              <span key={icon.title} title={icon.title} aria-hidden="true">
+                <BrandSocialIcon icon={icon} />
               </span>
             ))}
           </div>
